@@ -1,0 +1,12 @@
+*.[oa]
+*~
+*.py[co]
+*.doit.db
+
+build/
+dist/
+*.egg-info/
+.idea/
+
+*coverage*
+*.egg/
