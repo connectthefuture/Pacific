@@ -2,18 +2,29 @@ import os
 
 from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.txt')).read()
-CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
-requires = [
-    'pyramid',
-    'pyramid_debugtoolbar',
-    'waitress',
-    ]
+here = lambda path: os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
+
+with open(here('README.txt')) as f:
+    README = f.read()
+
+with open(here('CHANGES.txt')) as f:
+    CHANGES = f.read()
+
+with open(here('requirements.txt')) as f:
+    rows = f.read().strip().split('\n')
+    requires = []
+    for row in rows:
+        row = row.strip()
+        if row and not (row.startswith('#') or row.startswith('http')):
+            requires.append(row)
+
+
+# Setup
+# ----------------------------
 
 setup(name='Pacific',
-      version='0.0',
+      version='0.0.1',
       description='Pacific',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
@@ -22,18 +33,21 @@ setup(name='Pacific',
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         ],
-      author='',
-      author_email='',
-      url='',
-      keywords='web pyramid pylons',
+      author='Maxim Avanov',
+      author_email='maxim.avanov@gmail.com',
+      url='https://github.com/avanov',
+      keywords='web wsgi pylons pyramid blog',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
+      test_suite='pacific',
       install_requires=requires,
-      tests_require=requires,
-      test_suite="pacific",
       entry_points="""\
       [paste.app_factory]
-      main = pacific:main
+      main =pacific:main
+      [console_scripts]
+
+      [babel.extractors]
+      plim = plim.adapters.babelplugin:extract
       """,
       )

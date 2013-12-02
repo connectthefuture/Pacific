@@ -1,0 +1,65 @@
+server_name         localhost;
+access_log          /var/log/nginx/localhost.access.log;
+
+# It is possible to disable regular expression checks after
+# literal string matching by using "^~" prefix. If the most
+# specific match literal location has this prefix: regular
+# expressions aren't checked.
+
+# Project static files (logos and template images but not media data)
+location ^~ /static/dev/ {
+    # Do not set expires header here because we do not want caching of development files
+    alias           {{ project_frontend_files_dir }}/;
+    access_log      off;
+}
+
+location ^~ /static/ {
+    alias           {{ project_static_files_dir }}/;
+    access_log      off;
+    expires         30d;
+}
+
+# we currently gzip js and css files, so we need to add extra header
+# for them.
+location ^~ /static/js/ {
+    alias           {{ project_static_files_dir }}/js/;
+    access_log      off;
+    expires         30d;
+    add_header      Content-Encoding 'gzip';
+}
+
+location ^~ /static/css/ {
+    alias           {{ project_static_files_dir }}/css/;
+    access_log      off;
+    expires         30d;
+    add_header      Content-Encoding 'gzip';
+}
+
+# =================================
+# Uploads section.
+# =================================
+# All URLs for file uploading functionality in application
+# should start with "/upload" prefix
+location ^~ /upload/_tmp/ {
+    alias           {{ project_temporary_files_dir }}/;
+    access_log      off;
+    expires         5m;
+}
+
+
+location / {
+
+    {% include './pacific/proxy_params.j2' %}
+
+}
+
+location = /robots.txt {
+    root            {{ project_static_files_dir }};
+    expires         12h;
+}
+
+location = /favicon.ico {
+    root            {{ project_static_files_dir }};
+    access_log      off;
+    expires         12h;
+}

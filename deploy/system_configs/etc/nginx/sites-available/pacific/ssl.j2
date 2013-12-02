@@ -1,0 +1,10 @@
+listen               443;
+keepalive_timeout    70;
+
+ssl                  on;
+ssl_protocols        SSLv3 TLSv1;
+ssl_ciphers          AES128-SHA:AES256-SHA:RC4-SHA:DES-CBC3-SHA:RC4-MD5;
+ssl_certificate      /etc/nginx/insecure_ssl.crt;
+ssl_certificate_key  /etc/nginx/insecure_ssl.key;
+ssl_session_cache    shared:SSL:10m;
+ssl_session_timeout  10m;

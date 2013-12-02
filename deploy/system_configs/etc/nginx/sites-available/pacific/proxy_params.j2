@@ -1,0 +1,17 @@
+## Waitress configuration
+## ---------------------------
+
+proxy_pass              http://127.0.0.1:8000;
+proxy_redirect		    off;
+proxy_set_header	    Host		$host;
+proxy_set_header	    X-Real-IP	$remote_addr;
+
+
+# uWSGI configuration
+# ---------------------------
+
+##{% include './uwsgi_params.j2' %}
+## Add '\0' after unix: in order to use a socket in abstract namespace instead
+## of a file-based socket (abstract sockets available in Linux only)
+##uwsgi_pass              unix:/tmp/uwsgi_{{ project_name }}.sock;
+##uwsgi_param             SCRIPT_NAME "";

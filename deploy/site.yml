@@ -1,0 +1,308 @@
+---
+- hosts: pacific-develop-vm
+  vars:
+    instance_owner: vagrant
+    project_name: pacific
+    home: /home/${instance_owner}
+
+    playbooks_home: .
+    local_project_home: ./
+    local_config_dir: ${playbooks_home}/system_configs
+
+    vm_project_home: /vagrant
+    vm_project_venv: ${home}/venv/${project_name}
+    vm_config_dir: ${vm_project_home}/deploy/system_configs
+
+    project_static_files_dir: ${vm_project_home}/${project_name}/static
+    project_frontend_files_dir: ${vm_project_home}/${project_name}-frontend
+    project_media_dir: /tmp/${project_name}/media
+    project_temporary_files_dir: /tmp/www-junk/${project_name}/tmp/
+
+    postgres_version: 9.3
+    postgres_db_name: ${project_name}
+    postgres_db_user: ${project_name}
+    postgres_db_password: ${project_name}
+    postgres_unix_socket_dir: /var/run/postgresql
+
+    rabbitmq_user: ${project_name}
+    rabbitmq_password: ${project_name}
+    rabbitmq_vhost: /${project_name}
+
+    npm_local_bin: ${vm_project_home}/node_modules/.bin
+
+    locale: en_US.utf8
+
+  vars_files:
+    - vars/hardware.yml
+
+  sudo: yes
+
+  tasks:
+
+    - name: ensure apt cache is up to date
+      action: apt update_cache=yes
+
+    - name: Install prerequisite packages
+      action: apt pkg=${item} state=latest
+      with_items:
+        - python-apt
+        - python-software-properties
+        - g++
+        - make
+        - language-pack-en
+        - mc
+        - git
+        - mercurial
+
+    - name: Set up utf-8 locale
+      action: command update-locale ${item}=${locale}
+      with_items:
+        - LANG
+        - LANGUAGE
+        - LC_CTYPE
+        - LC_NUMERIC
+        - LC_TIME
+        - LC_COLLATE
+        - LC_MONETARY
+        - LC_MESSAGES
+        - LC_PAPER
+        - LC_NAME
+        - LC_ADDRESS
+        - LC_TELEPHONE
+        - LC_MEASUREMENT
+        - LC_IDENTIFICATION
+        - LC_ALL
+
+    - name: Add necessary repositories
+      action: apt_repository repo=${item} state=present
+      with_items:
+        # Redis >= 2.6
+        - ppa:chris-lea/redis-server
+        # NodeJS
+        - ppa:chris-lea/node.js
+        # Nginx
+        - ppa:nginx/stable
+        # Python 3.3
+        - ppa:fkrull/deadsnakes
+
+    - name: ensure apt cache is up to date
+      action: apt update_cache=yes
+
+    - name: Install necessary packages
+      action: apt pkg=${item} state=latest
+      with_items:
+        - python-dev
+        - python3.3-dev
+        - libxml2-dev
+        - libboost-python-dev
+        - libmemcached-dev
+        - libyaml-dev
+        - curl
+        - redis-server
+        - nginx-common
+        - nginx-extras
+        # for PIL
+        - libfreetype6
+        - libfreetype6-dev
+        - libjpeg-dev
+        # Speed-ups for pyScss
+        - libpcre3-dev
+
+    # PgBouncer & Postgres
+    # ----------------------
+    # Read about the repository at http://wiki.postgresql.org/wiki/Apt
+    - name: Add PostgreSQL Global Development Group repository
+      action: apt_repository repo='deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main'
+
+    - name: Add PostgreSQL Global Development Group apt key
+      action: apt_key url=http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc state=present
+
+    - name: ensure apt cache is up to date
+      action: apt update_cache=yes
+
+    - name: workaround to install postgresql with locale set
+      action: shell LANG=$locale LC_COLLATE=$locale LC_CTYPE=$locale LC_MESSAGES=$locale LC_MONETARY=$locale LC_NUMERIC=$locale LC_TIME=$locale LC_ALL=$locale apt-get install -y ${item}
+      with_items:
+        - postgresql-client-9.3
+        - postgresql-server-dev-9.3
+        - postgresql-9.3
+        - postgresql-contrib-9.3
+        - pgbouncer
+        # For ansible's postgres module
+        - libpq-dev
+        - python-psycopg2
+
+    # Sysctl
+    - name: Create Postgres' sysctl config
+      action: template src=${local_config_dir}/etc/sysctl.d/30-postgresql-shm.conf.j2 dest=/etc/sysctl.d/30-postgresql-shm.conf owner=root group=root mode=0644
+
+    - name: Update sysctl config
+      action: command service procps start
+
+    # Postgres
+    - name: Set up Postgres
+      action: template src=${local_config_dir}/etc/postgresql/${postgres_version}/main/${item}.j2 dest=/etc/postgresql/${postgres_version}/main/${item} owner=postgres group=postgres mode=0640
+      with_items:
+        - postgresql.conf
+        - pg_hba.conf
+
+    - name: Set up Postgres client
+      action: template src=${local_config_dir}/home/.pgpass.j2 dest=${home}/.pgpass owner=${instance_owner} group=${instance_owner} mode=0600
+
+    - name: Restart Postgres
+      action: command pg_ctlcluster ${postgres_version} main restart
+
+    - name: Add database user
+      action: postgresql_user user=${postgres_db_user} password=${postgres_db_password} role_attr_flags=LOGIN,CREATEDB,REPLICATION state=present
+      sudo: yes
+      sudo_user: postgres
+
+    - name: Create project's database
+      action: postgresql_db db=${postgres_db_name} owner=${postgres_db_user} state=present encoding=UTF8 lc_collate=en_US.utf8 lc_ctype=en_US.utf8
+      sudo: yes
+      sudo_user: postgres
+
+    # PgBouncer
+    - name: Set up PgBouncer
+      action: template src=${local_config_dir}/etc/default/${item}.j2 dest=/etc/default/${item} owner=root group=root mode=0644
+      with_items:
+        - pgbouncer
+
+    - name: Add PgBouncer's configuration files
+      action: template src=${local_config_dir}/etc/pgbouncer/${item}.j2 dest=/etc/pgbouncer/${item} owner=postgres group=postgres mode=0640
+      with_items:
+        - pgbouncer.ini
+        - userlist.txt
+
+    - name: Restart PgBouncer
+      action: command service pgbouncer restart
+
+    # nginx
+    # ----------------------
+    - name: Set up nginx
+      action: template src=${local_config_dir}/etc/nginx/${item}.j2 dest=/etc/nginx/${item} owner=root group=root mode=0644
+      with_items:
+        - nginx.conf
+        - sites-available/pacific
+
+    - name: Set up nginx's enabled sites
+      action: file src=/etc/nginx/sites-available/${item} path=/etc/nginx/sites-enabled/${item} state=link owner=root group=root mode=0644
+      with_items:
+        - pacific
+
+    - name: Set up nginx's enabled sites | Disable default server configuration
+      action: file src=/etc/nginx/sites-available/${item} path=/etc/nginx/sites-enabled/${item} state=absent owner=root group=root mode=0644
+      with_items:
+        - default
+
+    - name: Put SSL certificate into nginx system dir
+      action: copy src=${local_config_dir}/${item} dest=/etc/nginx/${item} owner=root group=www-data mode=0644
+      with_items:
+        - insecure_ssl.crt
+        - insecure_ssl.key
+
+    - name: Restart nginx
+      action: command service nginx restart
+
+    # Redis server
+    # ----------------------
+    - name: Set up Redis
+      action: template src=${local_config_dir}/etc/redis/${item}.conf.j2 dest=/etc/redis/${item}.conf owner=root group=root mode=0644
+      with_items:
+        - redis
+
+    - name: Restart redis-server
+      action: command service redis-server restart
+
+    # RabbitMQ
+    # ----------------------
+    - name: Add RabbitMQ repository
+      action: apt_repository repo='deb http://www.rabbitmq.com/debian/ testing main'
+
+    - name: Add RabbitMQ apt key
+      action: apt_key url=http://www.rabbitmq.com/rabbitmq-signing-key-public.asc state=present
+
+    - name: ensure apt cache is up to date
+      action: apt update_cache=yes
+
+    - name: Install RabbitMQ
+      action: apt pkg=${item} state=latest
+      with_items:
+        - rabbitmq-server
+
+    - name: Enable RabbitMQ's management plugin
+      action: rabbitmq_plugin names=rabbitmq_management state=enabled
+
+    - name: Add RabbitMQ vhost
+      action: rabbitmq_vhost name=${rabbitmq_vhost} state=present
+
+    - name: Add RabbitMQ user
+      action: rabbitmq_user user=${rabbitmq_user} password=${rabbitmq_password} vhost=${rabbitmq_vhost} configure_priv=.* read_priv=.* write_priv=.* state=present
+
+    - name: Restart RabbitMQ
+      action: command service rabbitmq-server restart
+
+    # Ruby
+    # ----------------------
+    # We use Ruby for Sass/Scss
+    - name: Install Ruby
+      action: apt pkg=${item} state=latest
+      with_items:
+        - ruby
+        - rubygems
+
+    # Ruby gems
+    # make sure we use 3.2.10 version of sass
+    - include: includes/gems.yml
+
+    # NodeJS
+    # ----------------------
+    - name: Install NodeJS
+      action: apt pkg=${item} state=present
+      with_items:
+        - nodejs
+
+    # NPM packages
+    # Update packages based on ${vm_project_home}/package.json
+    - name: Install NPM packages
+      action: npm path=${vm_project_home}
+      ignore_errors: True
+
+    - name: Update system templates
+      action:
+      action: template src=${local_config_dir}/etc/${item}.j2 dest=/etc/${item} owner=root group=root mode=0644
+      with_items:
+        - environment
+
+    # Make PIL working properly on Ubuntu x64
+    # ---------------------------------------
+    - name: Add symlinks to libjpeg for PIL
+      action: file src=/usr/lib/x86_64-linux-gnu/libjpeg.so path=/usr/lib/libjpeg.so state=link
+    - name: Add symlinks to libfreetype for PIL
+      action: file src=/usr/lib/x86_64-linux-gnu/libfreetype.so path=/usr/lib/libfreetype.so state=link
+    - name: Add symlinks to libz for PIL
+      action: file src=/usr/lib/x86_64-linux-gnu/libz.so path=/usr/lib/libz.so state=link
+
+    # Workaround for installing python3.3-compatible virtualenv and pip
+    # http://askubuntu.com/a/280205/57616
+    - name: Create project's virtual environment | Get easy_install
+      action: get_url url="http://peak.telecommunity.com/dist/ez_setup.py" dest=/tmp/ez_setup.py
+
+    - name: Create project's virtual environment | Install easy_install
+      action: command python /tmp/ez_setup.py
+
+    - name: Create project's virtual environment | Install pip
+      action: easy_install name=pip
+
+    - name: Create project's virtual environment | Install virtualenv
+      action: pip name=virtualenv
+
+    - name: Create project's virtual environment
+      action: command virtualenv -p python3.3 ${vm_project_venv} creates=${vm_project_venv}
+
+    - name: Populate project's environment
+      action: pip requirements=${vm_project_home}/requirements.txt virtualenv=${vm_project_venv}
+
+
+    - name: Populate project's environment with local packages
+      action: pip requirements=${vm_project_home}/requirements_local.txt virtualenv=${vm_project_venv}

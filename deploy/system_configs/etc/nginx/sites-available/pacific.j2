@@ -1,0 +1,35 @@
+# HTTPS main server
+server {
+
+    {% include './pacific/ssl.j2' %}
+    {% include './pacific/locations.j2' %}
+
+}
+
+# HTTPS media server
+server {
+
+    {% include './pacific/ssl.j2' %}
+    {% include './pacific/media.j2' %}
+
+}
+
+# HTTP -> HTTPS redirect
+# ----------------------
+
+# Main server
+server {
+    listen      80;
+    server_name localhost;
+    return      301 https://localhost$request_uri;
+}
+
+# Media server
+server {
+
+    {% include './pacific/media.j2' %}
+
+    listen      80;
+    return      301 https://$server_name$request_uri;
+
+}

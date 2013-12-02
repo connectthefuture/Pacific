@@ -1,12 +1,22 @@
-*.[oa]
+.[oa]
 *~
-*.py[co]
-*.doit.db
+.py[co]
+.doit.db
+.idea/
 
 build/
 dist/
 *.egg-info/
-.idea/
 
+docs/_build
+
+# Ignore all test-related files (see setup.py -> setup(tests_require=[]))
 *coverage*
-*.egg/
+*nose*
+*node_modules*
+
+# Ignore vagrant box meta files
+.vagrant/
+
+# Compass/Sass cache
+.sass-cache/

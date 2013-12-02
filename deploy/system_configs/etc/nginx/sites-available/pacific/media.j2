@@ -1,0 +1,7 @@
+server_name		    ~^(media)\.localhost$;
+access_log		    /var/log/nginx/media.localhost.access.log;
+
+location / {
+    root		    {{ project_media_dir }}/$1;
+    expires		    30d;
+}

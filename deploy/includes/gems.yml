@@ -1,0 +1,8 @@
+---
+  # make sure we use 3.2.10 version of sass
+  # http://stackoverflow.com/a/19073391/458106
+- name: Install Sass
+  command: gem install sass --version "=3.2.10" creates=/usr/local/bin/sass
+
+- name: Install Compass
+  command: gem install compass --version "=0.12.2" creates=/usr/local/bin/compass

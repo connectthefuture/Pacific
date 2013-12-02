@@ -1,0 +1,4 @@
+---
+hw_cpus_num: 1
+hw_cores_num: 1
+hw_physical_ram_gb: 1
