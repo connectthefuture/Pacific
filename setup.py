@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 here = lambda path: os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
 
-with open(here('README.txt')) as f:
+with open(here('README.rst')) as f:
     README = f.read()
 
 with open(here('CHANGES.txt')) as f:
@@ -28,15 +28,22 @@ setup(name='Pacific',
       description='Pacific',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
-        "Programming Language :: Python",
-        "Framework :: Pyramid",
-        "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-        ],
+          'Development Status :: 1 - Planning',
+          'Environment :: Web Environment',
+          'Framework :: Pyramid',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved',
+          'License :: OSI Approved :: MIT License',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 3',
+          'Operating System :: POSIX',
+          'Topic :: Internet :: WWW/HTTP',
+          'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
+      ],
       author='Maxim Avanov',
       author_email='maxim.avanov@gmail.com',
-      url='https://github.com/avanov',
-      keywords='web wsgi pylons pyramid blog',
+      url='https://github.com/avanov/Pacific',
+      keywords='web wsgi pylons pyramid',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
