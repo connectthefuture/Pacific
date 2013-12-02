@@ -3,6 +3,7 @@
 pyramid==1.5a2
 pyramid_chameleon
 pyramid_debugtoolbar
+# waitress is a wsgi server
 waitress
 
 # Databases
