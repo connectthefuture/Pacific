@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Pacific Project's documentation!
+Pacific Project
 ===========================================
 
 Contents:
@@ -12,6 +12,17 @@ Contents:
    :maxdepth: 2
 
 
+Getting started
+-----------------
+
+vagrant up
+vagrant ssh
+cd /vagrant
+source ~/venv/pacific/bin/activate
+sudo python setup.py develop
+pserve development.ini --reload
+
+Navigate to https://localhost:34443/
 
 Indices and tables
 ==================
