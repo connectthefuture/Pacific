@@ -9,7 +9,7 @@ waitress
 # Databases
 # ---------
 #alembic==0.6.0
-#psycopg2==2.5.1
+psycopg2==2.5.1
 #SQLAlchemy==0.8.3
 # db parts of pyramid (under consideration)
 #pyramid_tm

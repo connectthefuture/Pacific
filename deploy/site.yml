@@ -3,32 +3,32 @@
   vars:
     instance_owner: vagrant
     project_name: pacific
-    home: /home/${instance_owner}
+    home: "/home/{{ instance_owner }}"
 
     playbooks_home: .
     local_project_home: ./
-    local_config_dir: ${playbooks_home}/system_configs
+    local_config_dir: "{{ playbooks_home }}/system_configs"
 
     vm_project_home: /vagrant
-    vm_project_venv: ${home}/venv/${project_name}
-    vm_config_dir: ${vm_project_home}/deploy/system_configs
+    vm_project_venv: "{{ home }}/venv/{{ project_name }}"
+    vm_config_dir: "{{ vm_project_home }}/deploy/system_configs"
 
-    project_static_files_dir: ${vm_project_home}/${project_name}/static
-    project_frontend_files_dir: ${vm_project_home}/${project_name}-frontend
-    project_media_dir: /tmp/${project_name}/media
-    project_temporary_files_dir: /tmp/www-junk/${project_name}/tmp/
+    project_static_files_dir: "{{ vm_project_home }}/{{ project_name }}/static"
+    project_frontend_files_dir: "{{ vm_project_home }}/{{ project_name }}-frontend"
+    project_media_dir: "/tmp/{{ project_name }}/media"
+    project_temporary_files_dir: "/tmp/www-junk/{{ project_name }}/tmp/"
 
     postgres_version: 9.3
-    postgres_db_name: ${project_name}
-    postgres_db_user: ${project_name}
-    postgres_db_password: ${project_name}
+    postgres_db_name: "{{ project_name }}"
+    postgres_db_user: "{{ project_name }}"
+    postgres_db_password: "{{ project_name }}"
     postgres_unix_socket_dir: /var/run/postgresql
 
-    rabbitmq_user: ${project_name}
-    rabbitmq_password: ${project_name}
-    rabbitmq_vhost: /${project_name}
+    rabbitmq_user: "{{ project_name }}"
+    rabbitmq_password: "{{ project_name }}"
+    rabbitmq_vhost: "/{{ project_name }}"
 
-    npm_local_bin: ${vm_project_home}/node_modules/.bin
+    npm_local_bin: "{{ vm_project_home }}/node_modules/.bin"
 
     locale: en_US.utf8
 
@@ -43,7 +43,7 @@
       action: apt update_cache=yes
 
     - name: Install prerequisite packages
-      action: apt pkg=${item} state=latest
+      action: apt pkg={{ item }} state=latest
       with_items:
         - python-apt
         - python-software-properties
@@ -55,7 +55,7 @@
         - mercurial
 
     - name: Set up utf-8 locale
-      action: command update-locale ${item}=${locale}
+      action: command update-locale {{ item }}={{ locale }}
       with_items:
         - LANG
         - LANGUAGE
@@ -74,7 +74,7 @@
         - LC_ALL
 
     - name: Add necessary repositories
-      action: apt_repository repo=${item} state=present
+      action: apt_repository repo={{ item }} state=present
       with_items:
         # Redis >= 2.6
         - ppa:chris-lea/redis-server
@@ -89,7 +89,7 @@
       action: apt update_cache=yes
 
     - name: Install necessary packages
-      action: apt pkg=${item} state=latest
+      action: apt pkg={{ item }} state=latest
       with_items:
         - python-dev
         - python3.3-dev
@@ -121,7 +121,7 @@
       action: apt update_cache=yes
 
     - name: workaround to install postgresql with locale set
-      action: shell LANG=$locale LC_COLLATE=$locale LC_CTYPE=$locale LC_MESSAGES=$locale LC_MONETARY=$locale LC_NUMERIC=$locale LC_TIME=$locale LC_ALL=$locale apt-get install -y ${item}
+      action: shell LANG={{ locale }} LC_COLLATE={{ locale }} LC_CTYPE={{ locale }} LC_MESSAGES={{ locale }} LC_MONETARY={{ locale }} LC_NUMERIC={{ locale }} LC_TIME={{ locale }} LC_ALL={{ locale }} apt-get install -y {{ item }}
       with_items:
         - postgresql-client-9.3
         - postgresql-server-dev-9.3
@@ -134,42 +134,42 @@
 
     # Sysctl
     - name: Create Postgres' sysctl config
-      action: template src=${local_config_dir}/etc/sysctl.d/30-postgresql-shm.conf.j2 dest=/etc/sysctl.d/30-postgresql-shm.conf owner=root group=root mode=0644
+      action: template src={{ local_config_dir }}/etc/sysctl.d/30-postgresql-shm.conf.j2 dest=/etc/sysctl.d/30-postgresql-shm.conf owner=root group=root mode=0644
 
     - name: Update sysctl config
       action: command service procps start
 
     # Postgres
     - name: Set up Postgres
-      action: template src=${local_config_dir}/etc/postgresql/${postgres_version}/main/${item}.j2 dest=/etc/postgresql/${postgres_version}/main/${item} owner=postgres group=postgres mode=0640
+      action: template src={{ local_config_dir }}/etc/postgresql/{{ postgres_version }}/main/{{ item }}.j2 dest=/etc/postgresql/{{ postgres_version }}/main/{{ item }} owner=postgres group=postgres mode=0640
       with_items:
         - postgresql.conf
         - pg_hba.conf
 
     - name: Set up Postgres client
-      action: template src=${local_config_dir}/home/.pgpass.j2 dest=${home}/.pgpass owner=${instance_owner} group=${instance_owner} mode=0600
+      action: template src={{ local_config_dir }}/home/.pgpass.j2 dest={{ home }}/.pgpass owner={{ instance_owner }} group={{ instance_owner }} mode=0600
 
     - name: Restart Postgres
-      action: command pg_ctlcluster ${postgres_version} main restart
+      action: command pg_ctlcluster {{ postgres_version }} main restart
 
     - name: Add database user
-      action: postgresql_user user=${postgres_db_user} password=${postgres_db_password} role_attr_flags=LOGIN,CREATEDB,REPLICATION state=present
+      action: postgresql_user user={{ postgres_db_user }} password={{ postgres_db_password }} role_attr_flags=LOGIN,CREATEDB,REPLICATION state=present
       sudo: yes
       sudo_user: postgres
 
     - name: Create project's database
-      action: postgresql_db db=${postgres_db_name} owner=${postgres_db_user} state=present encoding=UTF8 lc_collate=en_US.utf8 lc_ctype=en_US.utf8
+      action: postgresql_db db={{ postgres_db_name }} owner={{ postgres_db_user }} state=present encoding=UTF8 lc_collate=en_US.utf8 lc_ctype=en_US.utf8
       sudo: yes
       sudo_user: postgres
 
     # PgBouncer
     - name: Set up PgBouncer
-      action: template src=${local_config_dir}/etc/default/${item}.j2 dest=/etc/default/${item} owner=root group=root mode=0644
+      action: template src={{ local_config_dir }}/etc/default/{{ item }}.j2 dest=/etc/default/{{ item }} owner=root group=root mode=0644
       with_items:
         - pgbouncer
 
     - name: Add PgBouncer's configuration files
-      action: template src=${local_config_dir}/etc/pgbouncer/${item}.j2 dest=/etc/pgbouncer/${item} owner=postgres group=postgres mode=0640
+      action: template src={{ local_config_dir }}/etc/pgbouncer/{{ item }}.j2 dest=/etc/pgbouncer/{{ item }} owner=postgres group=postgres mode=0640
       with_items:
         - pgbouncer.ini
         - userlist.txt
@@ -180,23 +180,23 @@
     # nginx
     # ----------------------
     - name: Set up nginx
-      action: template src=${local_config_dir}/etc/nginx/${item}.j2 dest=/etc/nginx/${item} owner=root group=root mode=0644
+      action: template src={{ local_config_dir }}/etc/nginx/{{ item }}.j2 dest=/etc/nginx/{{ item }} owner=root group=root mode=0644
       with_items:
         - nginx.conf
         - sites-available/pacific
 
     - name: Set up nginx's enabled sites
-      action: file src=/etc/nginx/sites-available/${item} path=/etc/nginx/sites-enabled/${item} state=link owner=root group=root mode=0644
+      action: file src=/etc/nginx/sites-available/{{ item }} path=/etc/nginx/sites-enabled/{{ item }} state=link owner=root group=root mode=0644
       with_items:
         - pacific
 
     - name: Set up nginx's enabled sites | Disable default server configuration
-      action: file src=/etc/nginx/sites-available/${item} path=/etc/nginx/sites-enabled/${item} state=absent owner=root group=root mode=0644
+      action: file src=/etc/nginx/sites-available/{{ item }} path=/etc/nginx/sites-enabled/{{ item }} state=absent owner=root group=root mode=0644
       with_items:
         - default
 
     - name: Put SSL certificate into nginx system dir
-      action: copy src=${local_config_dir}/${item} dest=/etc/nginx/${item} owner=root group=www-data mode=0644
+      action: copy src={{ local_config_dir }}/{{ item }} dest=/etc/nginx/{{ item }} owner=root group=www-data mode=0644
       with_items:
         - insecure_ssl.crt
         - insecure_ssl.key
@@ -207,7 +207,7 @@
     # Redis server
     # ----------------------
     - name: Set up Redis
-      action: template src=${local_config_dir}/etc/redis/${item}.conf.j2 dest=/etc/redis/${item}.conf owner=root group=root mode=0644
+      action: template src={{ local_config_dir }}/etc/redis/{{ item }}.conf.j2 dest=/etc/redis/{{ item }}.conf owner=root group=root mode=0644
       with_items:
         - redis
 
@@ -226,7 +226,7 @@
       action: apt update_cache=yes
 
     - name: Install RabbitMQ
-      action: apt pkg=${item} state=latest
+      action: apt pkg={{ item }} state=latest
       with_items:
         - rabbitmq-server
 
@@ -234,10 +234,10 @@
       action: rabbitmq_plugin names=rabbitmq_management state=enabled
 
     - name: Add RabbitMQ vhost
-      action: rabbitmq_vhost name=${rabbitmq_vhost} state=present
+      action: rabbitmq_vhost name={{ rabbitmq_vhost }} state=present
 
     - name: Add RabbitMQ user
-      action: rabbitmq_user user=${rabbitmq_user} password=${rabbitmq_password} vhost=${rabbitmq_vhost} configure_priv=.* read_priv=.* write_priv=.* state=present
+      action: rabbitmq_user user={{ rabbitmq_user }} password={{ rabbitmq_password }} vhost={{ rabbitmq_vhost }} configure_priv=.* read_priv=.* write_priv=.* state=present
 
     - name: Restart RabbitMQ
       action: command service rabbitmq-server restart
@@ -246,7 +246,7 @@
     # ----------------------
     # We use Ruby for Sass/Scss
     - name: Install Ruby
-      action: apt pkg=${item} state=latest
+      action: apt pkg={{ item }} state=latest
       with_items:
         - ruby
         - rubygems
@@ -258,19 +258,19 @@
     # NodeJS
     # ----------------------
     - name: Install NodeJS
-      action: apt pkg=${item} state=present
+      action: apt pkg={{ item }} state=present
       with_items:
         - nodejs
 
     # NPM packages
-    # Update packages based on ${vm_project_home}/package.json
+    # Update packages based on {{ vm_project_home }}/package.json
     - name: Install NPM packages
-      action: npm path=${vm_project_home}
+      action: npm path={{ vm_project_home }}
       ignore_errors: True
 
     - name: Update system templates
       action:
-      action: template src=${local_config_dir}/etc/${item}.j2 dest=/etc/${item} owner=root group=root mode=0644
+      action: template src={{ local_config_dir }}/etc/{{ item }}.j2 dest=/etc/{{ item }} owner=root group=root mode=0644
       with_items:
         - environment
 
@@ -298,11 +298,11 @@
       action: pip name=virtualenv
 
     - name: Create project's virtual environment
-      action: command virtualenv -p python3.3 ${vm_project_venv} creates=${vm_project_venv}
+      action: command virtualenv -p python3.3 {{ vm_project_venv }} creates={{ vm_project_venv }}
 
     - name: Populate project's environment
-      action: pip requirements=${vm_project_home}/requirements.txt virtualenv=${vm_project_venv}
+      action: pip requirements={{ vm_project_home }}/requirements.txt virtualenv={{ vm_project_venv }}
 
 
     - name: Populate project's environment with local packages
-      action: pip requirements=${vm_project_home}/requirements_local.txt virtualenv=${vm_project_venv}
+      action: pip requirements={{ vm_project_home }}/requirements_local.txt virtualenv={{ vm_project_venv }}
