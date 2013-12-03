@@ -3,8 +3,13 @@
 pyramid==1.5a2
 pyramid_chameleon
 pyramid_debugtoolbar
-# waitress is a wsgi server
-waitress
+
+# WSGI servers
+# ------------
+# production-ready
+uwsgi==1.9.20
+# for development purposes
+waitress==0.8.8
 
 # Databases
 # ---------
@@ -22,3 +27,13 @@ Mako==0.9.0
 pyramid_mako==0.3.1
 pyScss==1.2.0.post3
 Plim==0.9.0
+
+# Data validation
+# ---------------
+jsonschema==2.3.0
+
+# Tests
+# ---------------
+pytest==2.4.2
+# required by pytest
+py==1.4.18
