@@ -9,6 +9,6 @@ python:
 
 # --source specifies what packages to cover, you probably want to use that option
 script:
-    coverage run --source=pacific python setup.py test
+    coverage run --source=pacific setup.py test
 
 after_success: coveralls
