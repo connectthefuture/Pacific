@@ -10,10 +10,12 @@ dist/
 
 docs/_build
 
-# Ignore all test-related files (see setup.py -> setup(tests_require=[]))
-*coverage*
 *nose*
 *node_modules*
+# Ignore all test-related files (see setup.py -> setup(tests_require=[]))
+*coverage*
+# but keep the .coveragerc (for TravisCI/Coveralls services)
+!.coveragerc
 
 # Ignore vagrant box meta files
 .vagrant/

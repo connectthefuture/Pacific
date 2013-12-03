@@ -16,10 +16,15 @@ Getting started
 -----------------
 
 vagrant up
+
 vagrant ssh
+
 cd /vagrant
+
 source ~/venv/pacific/bin/activate
+
 sudo python setup.py develop
+
 pserve development.ini --reload
 
 Navigate to https://localhost:34443/
