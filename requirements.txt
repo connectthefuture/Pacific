@@ -1,8 +1,8 @@
 # The framework
 # -------------
 pyramid==1.5a2
-pyramid_chameleon
-pyramid_debugtoolbar
+pyramid_chameleon==0.1
+pyramid_debugtoolbar==1.0.9
 
 # WSGI servers
 # ------------
@@ -21,20 +21,24 @@ psycopg2==2.5.1
 #transaction
 #zope.sqlalchemy
 
-# Templates
-# ---------
+# Templates (# Plim and its requirements)
+# ---------------------------------------
 Mako==0.9.0
 pyramid_mako==0.3.1
+Plim==0.9.1
 pyScss==1.2.0.post3
-Plim==0.9.0
 
 # Data validation
 # ---------------
 jsonschema==2.3.0
 
-# Configuration
-# ---------------
+# Project Configuration
+# ---------------------
 PyYAML==3.10
+
+# Environment maintenance
+# -----------------------
+pip-tools==0.3.4
 
 # Tests
 # ---------------
