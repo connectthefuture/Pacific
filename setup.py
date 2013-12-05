@@ -77,12 +77,15 @@ setup(name='Pacific',
       cmdclass={
           'test': PyTest,
       },
-      entry_points="""\
-      [paste.app_factory]
-      main =pacific:main
-      [console_scripts]
-
-      [babel.extractors]
-      plim = plim.adapters.babelplugin:extract
-      """,
-      )
+      entry_points={
+          'paste.app_factory': [
+              'main = pacific:main'
+          ],
+          'console_scripts': [
+              'pacific = pacific.cli:main'
+          ],
+          'babel.extractors': [
+              'plim = plim.adapters.babelplugin:extract'
+          ]
+      }
+    )
