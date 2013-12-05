@@ -15,17 +15,15 @@ Contents:
 Getting started
 -----------------
 
-vagrant up
+.. code-block:: bash
 
-vagrant ssh
+    $ vagrant up
+    $ vagrant ssh
+    vagrant@precise64:~$ cd /vagrant
+    vagrant@precise64:/vagrant$ source ~/venv/pacific/bin/activate
+    (pacific)vagrant@precise64:/vagrant$ python setup.py develop
+    (pacific)vagrant@precise64:/vagrant$ pserve development.ini --reload
 
-cd /vagrant
-
-source ~/venv/pacific/bin/activate
-
-sudo python setup.py develop
-
-pserve development.ini --reload
 
 Navigate to https://localhost:34443/
 

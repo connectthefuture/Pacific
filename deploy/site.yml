@@ -1,8 +1,8 @@
 ---
 - hosts: pacific-develop-vm
   vars:
-    instance_owner: vagrant
     project_name: pacific
+    instance_owner: vagrant
     home: "/home/{{ instance_owner }}"
 
     playbooks_home: .
@@ -299,10 +299,12 @@
 
     - name: Create project's virtual environment
       action: command virtualenv -p python3.3 {{ vm_project_venv }} creates={{ vm_project_venv }}
+      sudo: no
 
     - name: Populate project's environment
       action: pip requirements={{ vm_project_home }}/requirements.txt virtualenv={{ vm_project_venv }}
-
+      sudo: no
 
     - name: Populate project's environment with local packages
       action: pip requirements={{ vm_project_home }}/requirements_local.txt virtualenv={{ vm_project_venv }}
+      sudo: no
