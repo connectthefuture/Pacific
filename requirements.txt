@@ -35,10 +35,7 @@ jsonschema==2.3.0
 # Project Configuration
 # ---------------------
 PyYAML==3.10
-
-# Environment maintenance
-# -----------------------
-pip-tools==0.3.4
+docopt==0.6.1
 
 # Tests
 # ---------------
