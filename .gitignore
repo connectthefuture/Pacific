@@ -22,3 +22,6 @@ docs/_build
 
 # Compass/Sass cache
 .sass-cache/
+
+# compiled pacific configs
+*.pconf
