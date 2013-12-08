@@ -43,14 +43,38 @@ def add_repository(config, repository, name, namespace, shard, **kw):
     :param config: Pyramid configurator instance
     :type config: :class:`pyramid.config.Configurator`
     """
-    print(kw)
+    repositories = config.registry.settings.setdefault('pacific.db.repositories', {})
+    repositories[name] = {
+        'repository': repository,
+        'namespace': namespace,
+        'shard': shard
+    }
 
 
-class RequestRepository(object):
-    """ Instances of this class will be attached to each request as ``request.repository``
+class RequestRepositories(object):
+    """ Instances of this class will be attached to each request as ``request.db.repositories``
     """
-    def __init__(self):
-        pass
+    def __init__(self, request):
+        """
+        :type request: :class:`pyramid.request.Request`
+        """
+        self.request = request
+        self.repositories = request.registry.settings['pacific.db.repositories']
+        self.instances = {}
 
-    def get(self, item):
-        pass
+    def get(self, name):
+        """
+
+        :param name: repository name
+        :type name: str
+        :return: repository instance
+
+        """
+        try:
+            return self.instances[name]
+        except KeyError:
+            credentials = self.repositories[name]
+            db_session = self.request.db.get_connection(credentials['namespace'], credentials['shard'])
+            instance = credentials['repository'](db_session)
+            self.instances[name] = instance
+            return instance

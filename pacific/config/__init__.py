@@ -2,6 +2,11 @@
 """
 
 def parse_db_settings(db):
+    """
+    :param db:
+    :type db: dict
+    :rtype: dict
+    """
     rv = {}
     for cluster in db:
         for db_name, credentials in db[cluster].items():

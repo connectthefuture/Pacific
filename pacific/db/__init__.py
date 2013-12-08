@@ -2,11 +2,11 @@
 This package provides an API for relational databases.
 """
 import sqlalchemy as sa
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from pacific.db.repository import repository_config
 from pacific.db.repository import add_repository
-from pacific.db.repository import RequestRepository
+from pacific.db.repository import RequestRepositories
 
 
 __all__ = ['repository_config']
@@ -44,23 +44,25 @@ def includeme(config):
         shard_sessions[shard] = sessionmaker(bind=engine, autocommit=False)
 
     config.add_request_method(request_db, 'db', reify=True)
-    config.add_request_method(request_repository, 'repository', reify=True)
     # Add a directive that is capable of registering project repositories
     config.add_directive('add_repository', add_repository)
 
 
 def request_db(request):
+    """
+
+    :param request:
+    :return: an instance of :class:`RequestDB`
+    :rtype: :class:`RequestDB`
+    """
     request.add_finished_callback(lambda request: request.db.discard())
-    return RequestDB()
-
-
-def request_repository(request):
-    return RequestRepository
+    return RequestDB(request)
 
 
 class RequestDB(object):
-    def __init__(self):
+    def __init__(self, request):
         self.sessions = {}
+        self.repositories = RequestRepositories(request)
 
     def get_connection(self, namespace, shard='default'):
         """
