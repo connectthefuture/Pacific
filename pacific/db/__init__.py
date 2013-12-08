@@ -4,6 +4,13 @@ This package provides an API for relational databases.
 import sqlalchemy as sa
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+from pacific.db.repository import repository_config
+from pacific.db.repository import add_repository
+from pacific.db.repository import RequestRepository
+
+
+__all__ = ['repository_config']
+
 
 # SQLAlchemy database engines & sessions. Updated by includeme().
 SESSION_FACTORIES = {}
@@ -12,6 +19,9 @@ SESSION_FACTORIES = {}
 def includeme(config):
     """ Pyramid configuration entry point.
     Call me before using any of the SQL Sessions.
+
+    :param config: Pyramid configurator instance
+    :type config: :class:`pyramid.config.Configurator`
     """
     global SESSION_FACTORIES
 
@@ -34,11 +44,18 @@ def includeme(config):
         shard_sessions[shard] = sessionmaker(bind=engine, autocommit=False)
 
     config.add_request_method(request_db, 'db', reify=True)
+    config.add_request_method(request_repository, 'repository', reify=True)
+    # Add a directive that is capable of registering project repositories
+    config.add_directive('add_repository', add_repository)
 
 
 def request_db(request):
     request.add_finished_callback(lambda request: request.db.discard())
     return RequestDB()
+
+
+def request_repository(request):
+    return RequestRepository
 
 
 class RequestDB(object):
