@@ -9,11 +9,7 @@ from pacific.db.repository import add_repository
 from pacific.db.repository import RequestRepositories
 
 
-__all__ = ['repository_config']
-
-
-# SQLAlchemy database engines & sessions. Updated by includeme().
-SESSION_FACTORIES = {}
+__all__ = ['repository_config', 'get_session_factories']
 
 
 def includeme(config):
@@ -23,11 +19,26 @@ def includeme(config):
     :param config: Pyramid configurator instance
     :type config: :class:`pyramid.config.Configurator`
     """
-    global SESSION_FACTORIES
+    session_factories = get_session_factories(config.registry.settings)
+    config.registry.settings['pacific.db.session_factories'] = session_factories
 
-    options_prefix = 'pacific.db.'
+    config.add_request_method(request_db, 'db', reify=True)
+    # Add a directive that is capable of registering project repositories
+    config.add_directive('add_repository', add_repository)
 
-    for key, value in config.registry.settings.items():
+
+def get_session_factories(settings, options_prefix='pacific.db.'):
+    """
+
+    :param settings:
+    :type settings: dict
+    :param options_prefix:
+    :type options_prefix: str
+    :return:
+    :rtype: dict
+    """
+    session_factories = {}
+    for key, value in settings.items():
         if not key.startswith(options_prefix):
             continue
 
@@ -39,13 +50,9 @@ def includeme(config):
                                   pool_size=10,
                                   max_overflow=10,
                                   pool_timeout=10)
-
-        shard_sessions = SESSION_FACTORIES.setdefault(domain, {})
+        shard_sessions = session_factories.setdefault(domain, {})
         shard_sessions[shard] = sessionmaker(bind=engine, autocommit=False)
-
-    config.add_request_method(request_db, 'db', reify=True)
-    # Add a directive that is capable of registering project repositories
-    config.add_directive('add_repository', add_repository)
+    return session_factories
 
 
 def request_db(request):
@@ -61,7 +68,12 @@ def request_db(request):
 
 class RequestDB(object):
     def __init__(self, request):
+        """
+        :param request: Pyramid Request object
+        :type request: :class:`pyramid.request.Request`
+        """
         self.sessions = {}
+        self.session_factories = request.registry.settings['pacific.db.session_factories']
         self.repositories = RequestRepositories(request)
 
     def get_connection(self, namespace, shard='default'):
@@ -80,7 +92,7 @@ class RequestDB(object):
             return self.sessions[key]
         except KeyError:
             # start a new session
-            session = SESSION_FACTORIES[namespace][shard]()
+            session = self.session_factories[namespace][shard]()
             self.sessions[key] = session
             return session
 

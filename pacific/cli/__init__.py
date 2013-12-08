@@ -55,7 +55,7 @@ def cmd_run(args):
     with open(compiled_config, 'w') as configfile:
         conf.write(configfile)
 
-    pserve_argv = ['pserve', compiled_config]
+    pserve_argv = ['pserve', compiled_config, '--reload']
     return pserve.main(pserve_argv)
 
 
