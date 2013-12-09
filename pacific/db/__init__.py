@@ -34,7 +34,7 @@ def get_session_factories(settings, options_prefix='pacific.db.'):
     :type settings: dict
     :param options_prefix:
     :type options_prefix: str
-    :return:
+    :return: dict of session factories
     :rtype: dict
     """
     session_factories = {}
@@ -58,7 +58,7 @@ def get_session_factories(settings, options_prefix='pacific.db.'):
 def request_db(request):
     """
 
-    :param request:
+    :param request: Pyramid Request instance
     :return: an instance of :class:`RequestDB`
     :rtype: :class:`RequestDB`
     """
@@ -69,7 +69,7 @@ def request_db(request):
 class RequestDB(object):
     def __init__(self, request):
         """
-        :param request: Pyramid Request object
+        :param request: Pyramid Request instance
         :type request: :class:`pyramid.request.Request`
         """
         self.sessions = {}
@@ -77,8 +77,7 @@ class RequestDB(object):
         self.repositories = RequestRepositories(request)
 
     def get_connection(self, namespace, shard='default'):
-        """
-        Returns a SQLAlchemy Session object according to given namespace and shard.
+        """ Returns a SQLAlchemy Session object according to given namespace and shard.
 
         :param namespace: namespace name according to Pacific config.
         :type namespace: str
@@ -97,5 +96,6 @@ class RequestDB(object):
             return session
 
     def discard(self):
+        """Close all sessions and return connections to the pool."""
         for sess in self.sessions.values():
             sess.close()
