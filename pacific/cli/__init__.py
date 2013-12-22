@@ -20,7 +20,7 @@ import yaml
 from docopt import docopt
 from pyramid.scripts import pserve
 
-from pacific.config import parse_db_settings
+from pacific import config as config_parser
 
 
 def main():
@@ -48,8 +48,16 @@ def cmd_run(args):
     conf.read(ini_config)
 
     conf['app:main']['pacific.superuser_id'] = str(pconf['superuser_id'])
-    db_settings = parse_db_settings(pconf['db'])
+
+    # Databases
+    # ------------------------------------
+    db_settings = config_parser.parse_db_settings(pconf['db'])
     conf['app:main'].update(db_settings)
+
+    # Applications
+    # ------------------------------------
+    apps = config_parser.parse_apps(pconf['apps'])
+    conf['app:main'].update({'apps': apps})
 
     compiled_config = '.{}.pconf'.format(yaml_config)
     with open(compiled_config, 'w') as configfile:

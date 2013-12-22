@@ -11,9 +11,6 @@ here = lambda path: os.path.join(os.path.abspath(os.path.dirname(__file__)), pat
 with open(here('README.rst')) as f:
     README = f.read()
 
-with open(here('CHANGES.txt')) as f:
-    CHANGES = f.read()
-
 with open(here('requirements.txt')) as f:
     rows = f.read().strip().split('\n')
     requires = []
@@ -50,7 +47,7 @@ class PyTest(TestCommand):
 setup(name='Pacific',
       version='0.0.1',
       description='Pacific',
-      long_description=README + '\n\n' + CHANGES,
+      long_description=README,
       classifiers=[
           'Development Status :: 1 - Planning',
           'Environment :: Web Environment',

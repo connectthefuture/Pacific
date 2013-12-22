@@ -1,0 +1,18 @@
+---
+# This is a sample configuration file of a project that uses Pacific.
+superuser_id: 1
+
+db:
+    pacific:
+        default:
+            host: /var/run/postgresql
+            port: 6543
+            database: pacific
+            user: pacific
+            password: pacific
+
+apps:
+    reef:
+        # url_prefix is mandatory and standard
+        # All other attributes are application-specific
+        url_prefix: /
