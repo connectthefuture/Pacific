@@ -1,5 +1,7 @@
 """ Pacific Config utilities
 """
+from . import errors
+
 
 def parse_db_settings(db):
     """
@@ -23,5 +25,9 @@ def parse_apps(apps):
     """
     prepared = []
     for app_name, attributes in apps.items():
-        prepared.append('{}=>{}'.format(app_name, attributes['url_prefix']))
+        try:
+            prepared.append('{}=>{}'.format(app_name, attributes['url_prefix']))
+        except KeyError:
+            raise errors.ImproperlyConfigured(
+                "Configuration for the {app} app doesn't contain the url_prefix attribute.".format(app=app_name))
     return ' '.join(prepared)
