@@ -21,6 +21,7 @@ def parse_apps(apps):
     """
     :param apps: a mapping of activated applications => URL prefixes
     :type apps: dict
+    :return: string in form of "{app_name}=>{url_prefix} ..."
     :rtype: str
     """
     prepared = []
