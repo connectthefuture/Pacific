@@ -22,7 +22,7 @@ Getting started
     vagrant@precise64:~$ cd /vagrant
     vagrant@precise64:/vagrant$ source ~/venv/pacific/bin/activate
     (pacific)vagrant@precise64:/vagrant$ python setup.py develop
-    (pacific)vagrant@precise64:/vagrant$ pserve development.ini --reload
+    (pacific)vagrant@precise64:/vagrant$ pacific run config.yml
 
 
 Navigate to https://localhost:34443/
