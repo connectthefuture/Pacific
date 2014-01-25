@@ -13,7 +13,6 @@ def main(global_config, **settings):
         config.include(app_name, url_prefix)
 
     #config.add_static_view('static', 'static', cache_max_age=3600)
-    #config.add_route('home', '/')
 
     config.scan()
     # We must also scan applications' packages
