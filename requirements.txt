@@ -1,6 +1,6 @@
 # The framework
 # -------------
-pyramid==1.5a2
+pyramid==1.5a4
 pyramid_chameleon==0.1
 pyramid_debugtoolbar==1.0.9
 
@@ -15,7 +15,7 @@ waitress==0.8.8
 # ---------
 #alembic==0.6.0
 psycopg2==2.5.1
-SQLAlchemy==0.8.3
+SQLAlchemy==0.9.1
 # db parts of pyramid (under consideration)
 #pyramid_tm
 #transaction
