@@ -17,13 +17,12 @@ preprocessor = functools.partial(compile_plim_source, parsers=PACIFIC_PARSERS)
 
 
 def includeme(config):
-    """
-    Set up standard configurator registrations. Use via:
+    """ Set up standard configurator registrations. Use via:
 
     .. code-block:: python
 
         config = Configurator()
-        config.include('pyramid_mako')
+        config.include('pacific.plimdsl')
 
     Once this function has been invoked, the ``.plim`` renderer
     is available for use in Pyramid. This can be overridden and more may be
