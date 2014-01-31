@@ -25,7 +25,7 @@ SQLAlchemy==0.9.1
 # ---------------------------------------
 Mako==0.9.1
 pyramid_mako==0.3.1
-Plim==0.9.1
+Plim==0.9.2
 pyScss==1.2.0.post3
 
 # Data validation
