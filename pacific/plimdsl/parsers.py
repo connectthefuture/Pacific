@@ -9,6 +9,6 @@ def parse_static_assets(indent_level, current_line, matched, source, parsers):
     return asset_name, indent_level, '', source
 
 
-PLIMDLS_PARSERS = (
+PLIMDSL_PARSERS = (
     (PARSE_STATIC_ASSETS_RE, parse_static_assets),
 )
