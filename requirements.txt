@@ -1,6 +1,6 @@
 # The framework
 # -------------
-pyramid==1.5a4
+pyramid==1.5b1
 pyramid_chameleon==0.1
 pyramid_debugtoolbar==1.0.9
 
