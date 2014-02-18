@@ -59,6 +59,12 @@ def cmd_run(args):
     apps = config_parser.parse_apps(pconf['apps'])
     conf['app:main'].update({'apps': apps})
 
+    # Applications' templates
+    template_dirs = [conf['app:main']['mako.directories']]
+    template_dirs.extend(['{}:templates'.format(app) for app in pconf['apps']])
+    template_dirs = ' '.join(template_dirs)
+    conf['app:main'].update({'mako.directories': template_dirs})
+
     compiled_config = '.{}.pconf'.format(yaml_config)
     with open(compiled_config, 'w') as configfile:
         conf.write(configfile)
