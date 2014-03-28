@@ -67,6 +67,8 @@ def request_db(request):
 
 
 class RequestDB(object):
+    """ An instance of this class is used as ``request.db`` attribute.
+    """
     def __init__(self, request):
         """
         :param request: Pyramid Request instance
