@@ -3,13 +3,13 @@ from pacific.db import repository_config
 
 @repository_config(namespace='pacific', name='users')
 class UsersRepository(object):
-    def __init__(self, db_session):
+    def __init__(self, session):
         """
 
-        :param db_session: SQLAlchemy's Session instance.
-        :type db_session: :class:`sqlalchemy.orm.session.Session`
+        :param session: SQLAlchemy's Session instance.
+        :type session: :class:`sqlalchemy.orm.session.Session`
         """
-        self.db = db_session
+        self.session = session
 
     def get_by_id(self, user_id):
         """
@@ -17,4 +17,4 @@ class UsersRepository(object):
         :param user_id:
         :type user_id: int
         """
-        return self.db.execute("SELECT 1").fetchone()
+        return self.session.execute("SELECT 1").fetchone()

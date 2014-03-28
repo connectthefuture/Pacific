@@ -6,7 +6,6 @@ from sqlalchemy.orm import sessionmaker
 
 from pacific.db.repository import repository_config
 from pacific.db.repository import add_repository
-from pacific.db.repository import RequestRepositories
 
 
 __all__ = ['repository_config', 'get_session_factories']
@@ -74,28 +73,50 @@ class RequestDbApi(object):
         :param request: Pyramid Request instance
         :type request: :class:`pyramid.request.Request`
         """
-        self.sessions = {}
-        self.session_factories = request.registry.settings['pacific.db.session_factories']
-        self.repositories = RequestRepositories(request)
+        registry_settings = request.registry.settings
+        self.repositories = registry_settings['pacific.db.repositories']
+        self.session_factories = registry_settings['pacific.db.session_factories']
 
-    def get_connection(self, namespace, shard='default'):
-        """ Returns a SQLAlchemy Session object according to given namespace and shard.
+        self.sessions = {}
+        self.repository_instances = {}
+
+
+    def get_repository(self, name):
+        """ Returns an instance of a Repository object.
+
+        :param name: repository name
+        :type name: str
+        :return: repository instance
+        """
+        try:
+            repository_instance = self.repository_instances[name]
+        except KeyError:
+            repository_conf = self.repositories[name]
+            session_instance = self.get_session(repository_conf['namespace'], repository_conf['shard'])
+            repository_instance = repository_conf['repository'](session_instance)
+            self.repository_instances[name] = repository_instance
+        return repository_instance
+
+    def get_session(self, namespace, shard='default'):
+        """ Returns a SQLAlchemy Session instance according to the given namespace and shard.
 
         :param namespace: namespace name according to Pacific config.
         :type namespace: str
         :param shard: one of the namespace shards. Shard 'default' is required to be set up
                       in the config.
         :type shard: str
-        :return: A SQLAlchemy Session object.
+        :return: SQLAlchemy's Session instance.
+        :rtype: :class:`sqlalchemy.orm.session.Session`
         """
         key = '{namespace}:{shard}'.format(namespace=namespace, shard=shard)
         try:
-            return self.sessions[key]
+            # find existing session instance
+            session_instance = self.sessions[key]
         except KeyError:
             # start a new session
-            session = self.session_factories[namespace][shard]()
-            self.sessions[key] = session
-            return session
+            session_instance = self.session_factories[namespace][shard]()
+            self.sessions[key] = session_instance
+        return session_instance
 
     def discard(self):
         """Close all sessions and return connections to the pool."""
