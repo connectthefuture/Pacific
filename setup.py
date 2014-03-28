@@ -69,7 +69,11 @@ setup(name='Pacific',
       include_package_data=True,
       zip_safe=False,
       test_suite='tests',
-      tests_require=['pytest', 'coverage'],
+      tests_require=[
+          'pytest>=2.4.2',
+          'py>=1.4.18',
+          'coverage'
+          ],
       install_requires=requires,
       cmdclass={
           'test': PyTest,
