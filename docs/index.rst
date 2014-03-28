@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Pacific Project
-===========================================
+===============
 
 Contents:
 
@@ -13,7 +13,7 @@ Contents:
 
 
 Getting started
------------------
+---------------
 
 .. code-block:: bash
 
