@@ -1,19 +1,13 @@
-import functools
-
 from plim.adapters.pyramid_renderer import add_plim_renderer
-from plim.lexer import compile_plim_source
-from plim.lexer import STANDARD_PARSERS
+from plim import preprocessor_factory
 
 from .parsers import PLIMDSL_PARSERS
 
 
 PACIFIC_PARSERS = []
 PACIFIC_PARSERS.extend(PLIMDSL_PARSERS)
-PACIFIC_PARSERS.extend(STANDARD_PARSERS)
-PACIFIC_PARSERS = tuple(PACIFIC_PARSERS)
 
-
-preprocessor = functools.partial(compile_plim_source, parsers=PACIFIC_PARSERS)
+preprocessor = preprocessor_factory(PACIFIC_PARSERS)
 
 
 def includeme(config):

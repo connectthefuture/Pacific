@@ -1,5 +1,8 @@
 ---
 # This is a sample configuration file of a project that uses Pacific.
+
+# environment_type is either dev or prod
+environment_type: dev
 superuser_id: 1
 
 db:
