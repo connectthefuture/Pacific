@@ -19,8 +19,7 @@ def includeme(config):
     :param config: Pyramid configurator instance
     :type config: :class:`pyramid.config.Configurator`
     """
-    session_factories = get_session_factories(config.registry.settings)
-    config.registry.settings['pacific.db.session_factories'] = session_factories
+    config.registry.settings['pacific.db.session_factories'] = get_session_factories(config.registry.settings)
 
     config.add_request_method(request_db, 'db', reify=True)
     # Add a directive that is capable of registering project repositories
@@ -34,7 +33,7 @@ def get_session_factories(settings, options_prefix='pacific.db.'):
     :type settings: dict
     :param options_prefix:
     :type options_prefix: str
-    :return: dict of session factories
+    :return: dict of {domain => {shard => sessionmaker()}} session factories
     :rtype: dict
     """
     session_factories = {}
@@ -59,14 +58,15 @@ def request_db(request):
     """
 
     :param request: Pyramid Request instance
-    :return: an instance of :class:`RequestDB`
-    :rtype: :class:`RequestDB`
+    :type request: :class:`pyramid.request.Request`
+    :return: an instance of :class:`RequestDbApi`
+    :rtype: :class:`pacific.db.RequestDbApi`
     """
     request.add_finished_callback(lambda request: request.db.discard())
-    return RequestDB(request)
+    return RequestDbApi(request)
 
 
-class RequestDB(object):
+class RequestDbApi(object):
     """ An instance of this class is used as ``request.db`` attribute.
     """
     def __init__(self, request):

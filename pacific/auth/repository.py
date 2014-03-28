@@ -1,12 +1,12 @@
 from pacific.db import repository_config
 
 
-@repository_config(name='users', namespace='pacific')
+@repository_config(namespace='pacific', name='users')
 class UsersRepository(object):
     def __init__(self, db_session):
         """
 
-        :param db_session:
+        :param db_session: SQLAlchemy's Session instance.
         :type db_session: :class:`sqlalchemy.orm.session.Session`
         """
         self.db = db_session

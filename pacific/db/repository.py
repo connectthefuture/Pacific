@@ -4,7 +4,7 @@ import venusian
 class repository_config(object):
     venusian = venusian
 
-    def __init__(self, name, namespace, shard='default'):
+    def __init__(self, namespace, name, shard='default'):
         """
         :param name: unique repository name
         :type name: str
@@ -15,8 +15,8 @@ class repository_config(object):
         :type shard: str
         """
         settings = {
-            'name': name,
             'namespace': namespace,
+            'name': name,
             'shard': shard
         }
         self.__dict__.update(settings)
@@ -36,12 +36,19 @@ class repository_config(object):
         return wrapped_class
 
 
-def add_repository(config, repository, name, namespace, shard, **kw):
+def add_repository(config, repository, namespace, name, shard, **kw):
     """ This function is used as a directive of Pyramid Config
     and responsible for registering available SQL repositories.
 
     :param config: Pyramid configurator instance
     :type config: :class:`pyramid.config.Configurator`
+    :param repository: repository class object
+    :param namespace: database namespace
+    :type namespace: str
+    :param name: database name, must be unique
+    :type name: str
+    :param shard: database shard
+    :type shard: str
     """
     repositories = config.registry.settings.setdefault('pacific.db.repositories', {})
     repositories[name] = {

@@ -6,7 +6,9 @@ environment_type: dev
 superuser_id: 1
 
 db:
+    # pacific is a namespace
     pacific:
+        # default is a shard
         default:
             host: /var/run/postgresql
             port: 6543
