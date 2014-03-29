@@ -43,9 +43,8 @@ def cmd_run(args):
     with open(yaml_config, 'r') as configfile:
         pconf = yaml.load(configfile.read())
 
-    ini_config = 'development.ini'
     conf = configparser.ConfigParser()
-    conf.read(ini_config)
+    conf.read_string(DEV_CONFIG)
 
     conf['app:main']['pacific.superuser_id'] = str(pconf['superuser_id'])
 
@@ -76,3 +75,88 @@ def cmd_run(args):
 COMMANDS = {
     'run': cmd_run
 }
+
+
+DEV_CONFIG = """
+# -------------------------------
+# app configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/environment.html
+# -------------------------------
+
+[app:main]
+use = egg:Pacific
+
+pyramid.reload_templates = true
+pyramid.debug_authorization = false
+pyramid.debug_notfound = false
+pyramid.debug_routematch = false
+pyramid.includes =
+    pyramid_debugtoolbar
+    pacific.plimdsl
+
+# By default, the toolbar only appears for clients from IP addresses
+# '127.0.0.1' and '::1'.
+# debugtoolbar.hosts = 127.0.0.1 ::1
+
+# Mako templates
+mako.directories = pacific:templates
+mako.input_encoding = utf-8
+
+asset.static_prefix = https://localhost:34443/static/
+asset.static_dev_prefix = https://localhost:34443/static/dev/
+
+# i18n and l10n
+# -------------------------------
+pyramid.default_locale_name = en
+available_languages = en de es ru
+
+# -------------------------------
+# wsgi server configuration
+# -------------------------------
+
+[server:main]
+use = egg:waitress#main
+host = 0.0.0.0
+port = 8000
+url_scheme = https
+
+# -------------------------------
+# logging configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/logging.html
+# -------------------------------
+
+[loggers]
+keys = root, pacific, sqlalchemy
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = INFO
+handlers = console
+
+[logger_pacific]
+level = DEBUG
+handlers =
+qualname = pacific
+
+[logger_sqlalchemy]
+level = INFO
+handlers =
+qualname = sqlalchemy.engine
+# "level = INFO" logs SQL queries.
+# "level = DEBUG" logs SQL queries and results.
+# "level = WARN" logs neither.  (Recommended for production systems.)
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(asctime)s %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
+"""

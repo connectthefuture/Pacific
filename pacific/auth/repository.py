@@ -1,7 +1,7 @@
 from pacific.db import repository_config
 
 
-@repository_config(namespace='pacific', name='users')
+@repository_config(name='users', namespace='pacific')
 class UsersRepository(object):
     def __init__(self, session):
         """

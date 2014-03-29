@@ -2,9 +2,12 @@ import venusian
 
 
 class repository_config(object):
+    """ Configure repository objects.
+
+    """
     venusian = venusian
 
-    def __init__(self, namespace, name, shard='default'):
+    def __init__(self, name, namespace, shard='default'):
         """
         :param name: unique repository name
         :type name: str
@@ -15,8 +18,12 @@ class repository_config(object):
         :type shard: str
         """
         settings = {
-            'namespace': namespace,
+            # lookup predicates
+            # -----------------
             'name': name,
+            # configuration options
+            # ---------------------
+            'namespace': namespace,
             'shard': shard
         }
         self.__dict__.update(settings)

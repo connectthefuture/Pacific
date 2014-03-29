@@ -32,6 +32,9 @@
 
     locale: en_US.utf8
 
+    pyenv_home: "{{ home }}/pyenv"
+    python_version: 3.4.0
+
   vars_files:
     - vars/hardware.yml
 
@@ -274,6 +277,10 @@
       with_items:
         - environment
 
+    # setup PyEnv
+    - include: includes/pyenv.yml
+
+
     # Make PIL working properly on Ubuntu x64
     # ---------------------------------------
     - name: Add symlinks to libjpeg for PIL
@@ -283,28 +290,12 @@
     - name: Add symlinks to libz for PIL
       action: file src=/usr/lib/x86_64-linux-gnu/libz.so path=/usr/lib/libz.so state=link
 
-    # Workaround for installing python3.3-compatible virtualenv and pip
-    # http://askubuntu.com/a/280205/57616
-    - name: Create project's virtual environment | Get easy_install
-      action: get_url url="http://peak.telecommunity.com/dist/ez_setup.py" dest=/tmp/ez_setup.py
 
-    - name: Create project's virtual environment | Install easy_install
-      action: command python /tmp/ez_setup.py
-
-    - name: Create project's virtual environment | Install pip
-      action: easy_install name=pip
-
-    - name: Create project's virtual environment | Install virtualenv
-      action: pip name=virtualenv
-
-    - name: Create project's virtual environment
-      action: command virtualenv -p python3.3 {{ vm_project_venv }} creates={{ vm_project_venv }}
-      sudo: no
 
     - name: Populate project's environment
-      action: pip requirements={{ vm_project_home }}/requirements.txt virtualenv={{ vm_project_venv }}
+      action: pip requirements={{ vm_project_home }}/requirements.txt virtualenv="{{ pyenv_home }}/versions/{{ project_name }}"
       sudo: no
 
     - name: Populate project's environment with local packages
-      action: pip requirements={{ vm_project_home }}/requirements_local.txt virtualenv={{ vm_project_venv }}
+      action: pip requirements={{ vm_project_home }}/requirements_local.txt virtualenv="{{ pyenv_home }}/versions/{{ project_name }}"
       sudo: no
