@@ -85,8 +85,6 @@
         - ppa:chris-lea/node.js
         # Nginx
         - ppa:nginx/stable
-        # Python 3.3
-        - ppa:fkrull/deadsnakes
 
     - name: ensure apt cache is up to date
       action: apt update_cache=yes
@@ -113,72 +111,7 @@
 
     # PgBouncer & Postgres
     # ----------------------
-    # Read about the repository at http://wiki.postgresql.org/wiki/Apt
-    - name: Add PostgreSQL Global Development Group repository
-      action: apt_repository repo='deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main'
-
-    - name: Add PostgreSQL Global Development Group apt key
-      action: apt_key url=http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc state=present
-
-    - name: ensure apt cache is up to date
-      action: apt update_cache=yes
-
-    - name: workaround to install postgresql with locale set
-      action: shell LANG={{ locale }} LC_COLLATE={{ locale }} LC_CTYPE={{ locale }} LC_MESSAGES={{ locale }} LC_MONETARY={{ locale }} LC_NUMERIC={{ locale }} LC_TIME={{ locale }} LC_ALL={{ locale }} apt-get install -y {{ item }}
-      with_items:
-        - postgresql-client-9.3
-        - postgresql-server-dev-9.3
-        - postgresql-9.3
-        - postgresql-contrib-9.3
-        - pgbouncer
-        # For ansible's postgres module
-        - libpq-dev
-        - python-psycopg2
-
-    # Sysctl
-    - name: Create Postgres' sysctl config
-      action: template src={{ local_config_dir }}/etc/sysctl.d/30-postgresql-shm.conf.j2 dest=/etc/sysctl.d/30-postgresql-shm.conf owner=root group=root mode=0644
-
-    - name: Update sysctl config
-      action: command service procps start
-
-    # Postgres
-    - name: Set up Postgres
-      action: template src={{ local_config_dir }}/etc/postgresql/{{ postgres_version }}/main/{{ item }}.j2 dest=/etc/postgresql/{{ postgres_version }}/main/{{ item }} owner=postgres group=postgres mode=0640
-      with_items:
-        - postgresql.conf
-        - pg_hba.conf
-
-    - name: Set up Postgres client
-      action: template src={{ local_config_dir }}/home/.pgpass.j2 dest={{ home }}/.pgpass owner={{ instance_owner }} group={{ instance_owner }} mode=0600
-
-    - name: Restart Postgres
-      action: command pg_ctlcluster {{ postgres_version }} main restart
-
-    - name: Add database user
-      action: postgresql_user user={{ postgres_db_user }} password={{ postgres_db_password }} role_attr_flags=LOGIN,CREATEDB,REPLICATION state=present
-      sudo: yes
-      sudo_user: postgres
-
-    - name: Create project's database
-      action: postgresql_db db={{ postgres_db_name }} owner={{ postgres_db_user }} state=present encoding=UTF8 lc_collate=en_US.utf8 lc_ctype=en_US.utf8
-      sudo: yes
-      sudo_user: postgres
-
-    # PgBouncer
-    - name: Set up PgBouncer
-      action: template src={{ local_config_dir }}/etc/default/{{ item }}.j2 dest=/etc/default/{{ item }} owner=root group=root mode=0644
-      with_items:
-        - pgbouncer
-
-    - name: Add PgBouncer's configuration files
-      action: template src={{ local_config_dir }}/etc/pgbouncer/{{ item }}.j2 dest=/etc/pgbouncer/{{ item }} owner=postgres group=postgres mode=0640
-      with_items:
-        - pgbouncer.ini
-        - userlist.txt
-
-    - name: Restart PgBouncer
-      action: command service pgbouncer restart
+    - include: includes/postgresql.yml
 
     # nginx
     # ----------------------
