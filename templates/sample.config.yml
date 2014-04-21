@@ -1,0 +1,15 @@
+---
+# This is a sample configuration file of a project that uses Pacific.
+superuser_id: 1
+
+db:
+    default:
+        host: /var/run/postgresql
+        port: 6543
+        database: pacific
+        user: pacific_master
+        password: insecure_password
+
+apps:
+    testapp: /testapp
+

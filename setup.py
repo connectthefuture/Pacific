@@ -1,15 +1,15 @@
 import os
+import sys
 
-from setuptools import setup, find_packages
+from setuptools import setup
+from setuptools import find_packages
+from setuptools.command.test import test as TestCommand
 
 
 here = lambda path: os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
 
 with open(here('README.rst')) as f:
     README = f.read()
-
-with open(here('CHANGES.txt')) as f:
-    CHANGES = f.read()
 
 with open(here('requirements.txt')) as f:
     rows = f.read().strip().split('\n')
@@ -20,13 +20,34 @@ with open(here('requirements.txt')) as f:
             requires.append(row)
 
 
+# Additional Hooks
+# ----------------------------
+# Integrate py.test with setup.py:
+# http://pytest.org/latest/goodpractises.html#integration-with-setuptools-test-commands
+
+
+
+class PyTest(TestCommand):
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # import here, cause outside the eggs aren't loaded
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
+
+
 # Setup
 # ----------------------------
 
 setup(name='Pacific',
-      version='0.0.1',
+      version='0.0.2',
       description='Pacific',
-      long_description=README + '\n\n' + CHANGES,
+      long_description=README,
       classifiers=[
           'Development Status :: 1 - Planning',
           'Environment :: Web Environment',
@@ -47,14 +68,25 @@ setup(name='Pacific',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      test_suite='pacific',
+      test_suite='tests',
+      tests_require=[
+          'pytest>=2.4.2',
+          'py>=1.4.18',
+          'coverage'
+          ],
       install_requires=requires,
-      entry_points="""\
-      [paste.app_factory]
-      main =pacific:main
-      [console_scripts]
-
-      [babel.extractors]
-      plim = plim.adapters.babelplugin:extract
-      """,
-      )
+      cmdclass={
+          'test': PyTest,
+      },
+      entry_points={
+          'paste.app_factory': [
+              'main = pacific:main'
+          ],
+          'console_scripts': [
+              'pacific = pacific.cli:main'
+          ],
+          'babel.extractors': [
+              'plim = plim.adapters.babelplugin:extract'
+          ]
+      }
+    )

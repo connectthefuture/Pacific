@@ -1,0 +1,23 @@
+---
+# This is a sample configuration file of a project that uses Pacific.
+
+# environment_type is either dev or prod
+environment_type: dev
+superuser_id: 1
+
+db:
+    # pacific is a namespace
+    pacific:
+        # default is a shard
+        default:
+            host: /var/run/postgresql
+            port: 6543
+            database: pacific
+            user: pacific
+            password: pacific
+
+apps:
+    reef:
+        # url_prefix is mandatory and standard
+        # All other attributes are application-specific
+        url_prefix: /
