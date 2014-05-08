@@ -12,15 +12,15 @@ pyramid_beaker==0.8
 # WSGI servers
 # ------------
 # production-ready
-uwsgi==1.9.20
+uwsgi==2.0.4
 # for development purposes
 waitress==0.8.8
 
 # Databases
 # ---------
 #alembic==0.6.0
-psycopg2==2.5.1
-SQLAlchemy==0.9.1
+psycopg2==2.5.2
+SQLAlchemy==0.9.4
 redis==2.9.1
 # db parts of pyramid (under consideration)
 #pyramid_tm
@@ -30,8 +30,8 @@ redis==2.9.1
 # Templates (# Plim and its requirements)
 # ---------------------------------------
 Mako==0.9.1
-pyramid_mako==1.0.1
-Plim==0.9.3
+pyramid_mako==1.0.2
+Plim==0.9.5
 pyScss==1.2.0.post3
 
 # Data validation

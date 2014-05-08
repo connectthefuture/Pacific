@@ -43,10 +43,16 @@ def cmd_run(args):
     with open(yaml_config, 'r') as configfile:
         pconf = yaml.load(configfile.read())
 
+    is_debug_mode = pconf['environment_type'] == 'dev' and True or False
+
     conf = configparser.ConfigParser()
     conf.read_string(DEV_CONFIG)
 
     conf['app:main']['pacific.superuser_id'] = str(pconf['superuser_id'])
+    if is_debug_mode:
+        conf['app:main']['pyramid.reload_templates'] = 'true'
+    else:
+        conf['app:main']['pyramid.reload_templates'] = 'false'
 
     # Databases
     # ------------------------------------
@@ -91,7 +97,7 @@ pyramid.debug_authorization = false
 pyramid.debug_notfound = false
 pyramid.debug_routematch = false
 pyramid.includes =
-    pyramid_debugtoolbar
+    # pyramid_debugtoolbar
     pacific.plimdsl
 
 # By default, the toolbar only appears for clients from IP addresses
