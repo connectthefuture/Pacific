@@ -13,4 +13,7 @@ Pacific
 .. image:: https://coveralls.io/repos/avanov/Pacific/badge.png?branch=develop
         :target: https://coveralls.io/r/avanov/Pacific?branch=develop
 
+.. image:: https://gemnasium.com/avanov/Pacific.svg
+        :target: https://gemnasium.com/avanov/Pacific
+
 Nothing interesting so far
