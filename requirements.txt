@@ -40,6 +40,6 @@ jsonschema==2.3.0
 
 # Project Configuration
 # ---------------------
-PyYAML==3.11
+PyYAML==5.1
 docopt==0.6.1
 venusian==1.0a8
