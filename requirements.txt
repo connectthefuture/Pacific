@@ -14,7 +14,7 @@ pyramid_beaker==0.8
 # production-ready
 uwsgi==2.0.4
 # for development purposes
-waitress==0.8.8
+waitress==1.4.3
 
 # Databases
 # ---------
